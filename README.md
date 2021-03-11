@@ -49,6 +49,8 @@ Vagrant Lab with Ansible, K8s and Docker. Docker image with Vuejs example.
 
     - sudo docker run -rm -p 5000:5000 -p 8888:8888 --name=vagrant vagrant_lab:latest
 
+    - sudo docker rmi $(sudo docker image ls | grep none | head -n-1 | awk '{print $3}')
+
 # Creating helm to deploy1
 
     - helm create lab-vagrant 
