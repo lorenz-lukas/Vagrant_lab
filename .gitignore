@@ -129,7 +129,4 @@ dmypy.json
 .pyre/
 .vagrant/
 helm/
-node_modules/
-src/
-public/
-*.js
+folders
