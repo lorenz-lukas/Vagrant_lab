@@ -77,3 +77,5 @@
     mode: 0644
   notify: # restarta quando tem mudanca no arquivo /etc/containerd/config.toml
     - Restart containerd service
+
+- meta: flush_handlers

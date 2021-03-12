@@ -49,3 +49,10 @@
   when:
     - init_status is not skipped 
     - init_status is succeeded
+  register: cni_status
+
+- name: Remove taint do isolamento do control plane para rodar aplicação no master
+  command: kubectl --kubeconfig=~/.kube/config taint nodes --all node-role.kubernetes.io/master-
+  when:  
+    - cni_status is not skipped 
+    - cni_status is succeeded

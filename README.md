@@ -37,9 +37,11 @@ Vagrant Lab with Ansible, K8s and Docker. Docker image with Vuejs example.
 
     - ssh -i ./.vagrant/machines/default/virtualbox/private_key vagrant@192.168.33.10
 
-    - scp -i ./.vagrant/machines/default/virtualbox/private_key -r ~/.ssh/vagrant_id.pub vagrant@192.168.33.10:/home/vagrant/.ssh/authorized_keys
+    - scp -i ./.vagrant/machines/default/virtualbox/private_key -r ~/.ssh/vagrant_id.pub vagrant@192.168.33.10:/home/vagrant/.ssh/vagrant_id.pub 
 
-    - ssh -i ~/.ssh/vagrant_id vagrant@192.168.33.10
+    - ssh -i ~/.ssh/vagrant_id vagrant@192.168.33.10 
+
+    - cat ~/.ssh/vagrant_id.pub >> ~/.ssh/authorized_keys
 
 # Running
 
@@ -68,6 +70,14 @@ Vagrant Lab with Ansible, K8s and Docker. Docker image with Vuejs example.
     - cd helm && helm template lab-vagrant lab-vagrant && cd ..
 
 # Deploy helm
+    
+    - ssh -i ~/.ssh/vagrant_id vagrant@192.168.33.10 
+
+    - sudo cp /etc/kubernetes/admin.conf && sudo chown vagrant. admin.conf && exit
+
+    - mkdir -p ~/.kube
+
+    - scp -i ~/.ssh/vagrant_id vagrant@192.168.33.10:/home/vagrant/admin.conf ~/.kube/config
 
     - cd helm && helm install lab-vagrant lab-vagrant && helm list && cd ..
     
@@ -89,3 +99,58 @@ Vagrant Lab with Ansible, K8s and Docker. Docker image with Vuejs example.
         containers:
             - name: "{{ .Values.deployment.name }}"
             image: {{ .Values.deployment.image }}:{{ .Values.deployment.tag }}
+
+    - Automatically reload pods when configmap changes:
+        spec:
+            ...
+            template:
+                metadata:
+                annotations:
+                    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+                labels:
+                    app: "{{ .Values.name }}" 
+
+    - flux control to set resources in deploy.yalm:
+
+        spec:
+        containers:
+        - name: "{{ .Values.name }}"
+            image: {{ .Values.deployment.image }}:{{ .Values.deployment.tag }}
+            imagePullPolicy: Always
+            ports:
+            - containerPort: 5000
+            {{- if .Values.deployment.resources }}
+            resources:
+            {{- if .Values.deployment.resources.requests }}
+            requests:
+                memory: {{ .Values.deployment.resources.requests.memory | default "50Mi" | quote }}
+                cpu: {{ .Values.deployment.resources.requests.cpu | default "10m" | quote }}
+            {{- else}}
+            requests:
+                memory: "50Mi"
+                cpu: "10m"
+            {{- end}}
+            {{- if .Values.deployment.resources.limits }}
+            limits:
+                memory: {{ .Values.deployment.resources.limits.memory | default "1024Mi" | quote }}
+                cpu: {{ .Values.deployment.resources.limits.cpu | default "1" | quote }}
+            {{- else}}  
+            limits:
+                memory: "1024Mi"
+                cpu: "1"
+            {{- end }}
+            {{- else }}
+            resources:
+            requests:
+                memory: "50Mi"
+                cpu: "10m"
+            limits:
+                memory: "1024Mi"
+                cpu: "1"
+            {{- end}} 
+
+# References
+
+    [https://helm.sh/docs/topics/charts/]
+
+    [https://github.com/marcel-dempers/docker-development-youtube-series/blob/master/kubernetes/]
