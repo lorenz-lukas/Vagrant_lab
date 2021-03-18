@@ -19,6 +19,8 @@ Vagrant Lab with Ansible, K8s and Docker. Docker image with Vuejs example.
 
     - https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04-pt
 
+    sudo apt-get install libarchive-tools
+
 # Starting a VM with Vagrant
 
     - Ubuntu 20: sudo apt-get install libarchive-tools
