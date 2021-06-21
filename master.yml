@@ -1,7 +1,0 @@
----
-  - hosts: masters
-    become: yes
-    remote_user: vagrant
-    roles:
-      - containerd
-      - k8s
